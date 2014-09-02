@@ -76,9 +76,9 @@ var olwidget = {
             // an IE6 bug.  This duplicates that constructor.
             return new OpenLayers.Layer.OSM("OpenStreetMap (Mapnik)",
                     [
-                        "http://a.tile.openstreetmap.org/${z}/${x}/${y}.png",
-                        "http://b.tile.openstreetmap.org/${z}/${x}/${y}.png",
-                        "http://c.tile.openstreetmap.org/${z}/${x}/${y}.png"
+                        "https://a.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                        "https://b.tile.openstreetmap.org/${z}/${x}/${y}.png",
+                        "https://c.tile.openstreetmap.org/${z}/${x}/${y}.png"
                     ],
                     { numZoomLevels: 19 });
         }
@@ -1041,7 +1041,7 @@ olwidget.EditableLayerSwitcher = OpenLayers.Class(OpenLayers.Control.LayerSwitch
 
         // fix ugly MSIE errors on editing toolbar disappear:
         // bind event listeners to drawFeature controls activation event
-        for(var i=0; i < this.panel.controls.length; i++){          
+        for(var i=0; i < this.panel.controls.length; i++){
             this.panel.controls[i].events.register('activate', this, function(evt){
                 this.panel.redraw();
             });
