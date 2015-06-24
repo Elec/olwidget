@@ -12,9 +12,9 @@ from olwidget import utils
 # specifying a value in settings.py
 
 setattr(settings, "OLWIDGET_STATIC_URL",
-    getattr(settings,
-        "OLWIDGET_STATIC_URL",
-        utils.url_join(settings.STATIC_URL, "olwidget")))
+        getattr(settings,
+                "OLWIDGET_STATIC_URL",
+                utils.url_join(settings.STATIC_URL, "olwidget")))
 
 api_defaults = {
     'GOOGLE_API_KEY': "",
@@ -24,7 +24,7 @@ api_defaults = {
     'YAHOO_API': "http://api.maps.yahoo.com/ajaxymap?v=3.0",
     'OSM_API': "//openstreetmap.org/openlayers/OpenStreetMap.js",
     'OL_API': "http://openlayers.org/api/2.11/OpenLayers.js",
-    'MS_VE_API' : "//ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6.2&s=1",
+    'MS_VE_API': "//ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6.2&s=1",
     'CLOUDMADE_API': utils.url_join(settings.OLWIDGET_STATIC_URL, "js/cloudmade.js"),
     'OLWIDGET_JS': utils.url_join(settings.OLWIDGET_STATIC_URL, "js/olwidget.js"),
     'OLWIDGET_CSS': utils.url_join(settings.OLWIDGET_STATIC_URL, "css/olwidget.css"),
@@ -40,6 +40,7 @@ for key, default in api_defaults.iteritems():
 #
 
 class Map(forms.Widget):
+
     """
     ``Map`` is a container widget for layers.  The constructor takes a list of
     vector layer instances, a dictionary of options for the map, a template
@@ -49,7 +50,7 @@ class Map(forms.Widget):
     default_template = 'olwidget/multi_layer_map.html'
 
     def __init__(self, vector_layers=None, options=None, template=None,
-            layer_names=None):
+                 layer_names=None):
         self.vector_layers = VectorLayerList()
         for layer in vector_layers:
             self.vector_layers.append(layer)
@@ -87,7 +88,7 @@ class Map(forms.Widget):
             lyr_name = layer_names[i]
             id_ = "%s_%s" % (map_id, lyr_name)
             # Use "prepare" rather than "render" to get both js and html
-            (js, html) = layer.prepare(lyr_name, value, attrs={'id': id_ })
+            (js, html) = layer.prepare(lyr_name, value, attrs={'id': id_})
             layer_js.append(js)
             layer_html.append(html)
 
@@ -116,19 +117,21 @@ class Map(forms.Widget):
 
     def value_from_datadict(self, data, files, name):
         """ Return an array of all layers' values. """
-        return [vl.value_from_datadict(data, files, lyr_name) for vl, lyr_name in zip(self.vector_layers, self._get_layer_names(name))]
+        return [vl.value_from_datadict(data, files, lyr_name)
+                for vl, lyr_name in zip(self.vector_layers, self._get_layer_names(name))]
 
     def _custom_layer_types_js(self):
         layer_types_js = ""
         for typename in self.custom_layer_types:
             js_def = self.custom_layer_types[typename]
-            layer_types_js += "olwidget.%s = {map: function() { return new %s }};" % (typename, js_def)
+            layer_types_js += "olwidget.%s = {map: function() { return new %s }};" % (
+                typename, js_def)
         return layer_types_js
 
     def _get_layer_names(self, name):
-        """ 
+        """
         If the user gave us a layer_names parameter, use that.  Otherwise,
-        construct names based on ``name``. 
+        construct names based on ``name``.
         """
         n = len(self.vector_layers)
         if self.layer_names and len(self.layer_names) == n:
@@ -136,7 +139,7 @@ class Map(forms.Widget):
 
         singleton = len(self.vector_layers.editable) == 1
         self.layer_names = []
-        for i,layer in enumerate(self.vector_layers):
+        for i, layer in enumerate(self.vector_layers):
             if singleton and layer.editable:
                 self.layer_names.append("%s" % name)
             else:
@@ -180,7 +183,9 @@ class Map(forms.Widget):
         obj.vector_layers = copy.deepcopy(self.vector_layers)
         return obj
 
+
 class VectorLayerList(list):
+
     def __init__(self, *args, **kwargs):
         super(VectorLayerList, self).__init__(*args, **kwargs)
         self.editable = []
@@ -205,8 +210,10 @@ class VectorLayerList(list):
 # Layer widgets
 #
 
+
 class BaseVectorLayer(forms.Widget):
     editable = False
+
     def prepare(self, name, value, attrs=None):
         """
         Given the name, value and attrs, prepare both html and javascript
@@ -238,7 +245,9 @@ class BaseVectorLayer(forms.Widget):
     def __unicode__(self):
         return self.render(None, None)
 
+
 class InfoLayer(BaseVectorLayer):
+
     """
     A wrapper for the javscript olwidget.InfoLayer() type.  Takes an an array
     [geometry, html] pairs, where the html will be the contents of a popup
@@ -263,7 +272,7 @@ class InfoLayer(BaseVectorLayer):
                 wkt_array.append([wkt, attr])
         info_json = json.dumps(wkt_array)
 
-        if name and not self.options.has_key('name'):
+        if name and 'name' not in self.options:
             self.options['name'] = forms.forms.pretty_name(name)
 
         context = {
@@ -276,7 +285,9 @@ class InfoLayer(BaseVectorLayer):
         html = ""
         return (js, html)
 
+
 class EditableLayer(BaseVectorLayer):
+
     """
     A wrapper for the javascript olwidget.EditableLayer() type.  Intended for
     use as a sub-widget for the Map widget.
@@ -292,7 +303,7 @@ class EditableLayer(BaseVectorLayer):
     def prepare(self, name, value, attrs=None):
         if not attrs:
             attrs = {}
-        if name and not self.options.has_key('name'):
+        if name and 'name' not in self.options:
             self.options['name'] = forms.forms.pretty_name(name)
         attrs['id'] = attrs.get('id', "id_%s" % id(self))
 
@@ -311,37 +322,49 @@ class EditableLayer(BaseVectorLayer):
 # Convenience single layer widgets for use in non-MapField fields.
 #
 
+
 class BaseSingleLayerMap(Map):
+
     """
     Base type for single-layer maps, for convenience and backwards
     compatibility.
     """
+
     def value_from_datadict(self, data, files, name):
         val = super(BaseSingleLayerMap, self).value_from_datadict(
-                data, files, name)
+            data, files, name)
         return val[0]
 
+
 class EditableMap(BaseSingleLayerMap):
+
     """
     Convenience Map widget with a single editable layer.  Usage:
 
         forms.CharField(widget=EditableMap(options={}))
 
     """
+
     def __init__(self, options=None, **kwargs):
         super(EditableMap, self).__init__([EditableLayer()], options, **kwargs)
-        
+
+
 class InfoMap(BaseSingleLayerMap):
+
     """
     Convenience Map widget with a single info layer.
     """
+
     def __init__(self, info, options=None, **kwargs):
         super(InfoMap, self).__init__([InfoLayer(info)], options, **kwargs)
 
+
 class MapDisplay(EditableMap):
+
     """
     Convenience Map widget for a single non-editable layer, with no popups.
     """
+
     def __init__(self, fields=None, options=None, **kwargs):
         options = utils.get_options(options)
         options['editable'] = False
@@ -353,4 +376,3 @@ class MapDisplay(EditableMap):
 
     def __unicode__(self):
         return self.render(None, [self.wkt])
-

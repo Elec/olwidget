@@ -25,7 +25,9 @@ class MyModel(models.Model):
 # form for testing
 #
 
+
 class MyModelForm(MapModelForm):
+
     class Meta:
         model = MyModel
         maps = (
@@ -34,51 +36,62 @@ class MyModelForm(MapModelForm):
         )
 
 # Required=false form
+
+
 class RequirednessForm(forms.Form):
     optional = MapField(
-            fields=[EditableLayerField(required=False, options={
+        fields=[EditableLayerField(required=False, options={
                 'geometry': 'point',
                 'name': 'optional',
-            })],
-            options={
-                'overlay_style': {'fill_color': '#00ff00'},
-            })
+                })],
+        options={
+            'overlay_style': {'fill_color': '#00ff00'},
+        })
     required = MapField(
-            fields=[EditableLayerField(required=True, options={
+        fields=[EditableLayerField(required=True, options={
                 'geometry': 'point',
                 'name': 'required',
-            })],
-            options={
-                'overlay_style': {'fill_color': '#00ff00'},
-            })
+                })],
+        options={
+            'overlay_style': {'fill_color': '#00ff00'},
+        })
     unspecified = MapField(
-            fields=[EditableLayerField({
+        fields=[EditableLayerField({
                 'geometry': 'point',
                 'name': 'unspecified',
-            })],
-            options={
-                'overlay_style': {'fill_color': '#00ff00'},
-            })
+                })],
+        options={
+            'overlay_style': {'fill_color': '#00ff00'},
+        })
 
 #
 # MapModelForm with single set of options.  The two should be equivalent.
 #
+
+
 class SingleStyleMapModelForm(MapModelForm):
+
     class Meta:
         model = MyModel
         options = {'layers': ['google.streets']}
 
+
 class SingleStyleMapModelFormEquivalent(MapModelForm):
+
     class Meta:
         model = MyModel
         maps = ((('start', 'route', 'end'), {'layers': ['google.streets']}),)
 
+
 class CustomTemplateMapModelForm(MapModelForm):
+
     class Meta:
         model = MyModel
         template = "olwidget/test_map_template.html"
 
+
 class MixedTemplateMapModelForm(MapModelForm):
+
     class Meta:
         model = MyModel
         template = 'olwidget/multi_layer_map.html'
@@ -91,21 +104,23 @@ class MixedTemplateMapModelForm(MapModelForm):
 # tests
 #
 
+
 class TestForm(TestCase):
+
     def test_single_form(self):
         class MySingleForm(forms.Form):
             char = forms.CharField(max_length=10, required=False)
             field = forms.CharField(widget=EditableMap({"name": "Fun times"}))
 
         form = MySingleForm({'field': 1})
-        #print(form)
+        # print(form)
         self.assertTrue(form.is_bound)
         self.assertTrue(form.is_valid())
-        #print(form.media)
+        # print(form.media)
         self.assertNotEqual(form.media, '')
 
         form = MySingleForm({'notafield': 1})
-        #print(form)
+        # print(form)
         self.assertTrue(form.fields['field'].required)
         self.assertTrue(form.is_bound)
         self.assertFalse(form.is_valid())
@@ -124,7 +139,6 @@ class TestForm(TestCase):
         self.assertEqual(form.errors, {})
         self.assertTrue(form.is_valid())
 
-
         form = MyMultiForm({'mymap_0': 0})
         self.assertTrue(form.is_bound)
         self.assertFalse(form.is_valid())
@@ -133,26 +147,27 @@ class TestForm(TestCase):
         # Just ensure that no errors arise from construction and rendering
         mymap = InfoMap([[Point(0, 0, srid=4326), "that"]], {"name": "frata"})
         unicode(mymap)
-        #print(mymap)
+        # print(mymap)
 
     def test_modelform_empty(self):
         form = MyModelForm()
         unicode(form)
 
     def test_modelform_valid(self):
-        form = MyModelForm({'start': "SRID=4326;POINT(0 0)", 
-            'route': "SRID=4326;LINESTRING(0 0,1 1)"})
+        form = MyModelForm({'start': "SRID=4326;POINT(0 0)",
+                            'route': "SRID=4326;LINESTRING(0 0,1 1)"})
         self.assertTrue(form.is_bound)
         self.assertTrue(form.is_valid())
         # check order of keys
-        self.assertEqual(form.fields.keys(), 
-            ['koan', 'start_end', 'love', 'route', 'death']
-        )
+        self.assertEqual(form.fields.keys(),
+                         ['koan', 'start_end', 'love', 'route', 'death']
+                         )
         form.save()
-        #print(form)
+        # print(form)
 
     def test_modelform_invalid(self):
         class MyOtherModelForm(MapModelForm):
+
             class Meta:
                 model = MyModel
 
@@ -161,11 +176,12 @@ class TestForm(TestCase):
         self.assertFalse(form.is_valid())
 
         form = MyOtherModelForm()
-        #print(form)
+        # print(form)
         unicode(form)
 
     def test_modelform_initial(self):
-        form = MyModelForm(instance=MyModel.objects.create(start="SRID=4326;POINT(0 0)", route="SRID=4326;LINESTRING(0 0,1 1)"))
+        form = MyModelForm(instance=MyModel.objects.create(
+            start="SRID=4326;POINT(0 0)", route="SRID=4326;LINESTRING(0 0,1 1)"))
         unicode(form)
 
     def test_info_modelform(self):
@@ -174,18 +190,19 @@ class TestForm(TestCase):
                 EditableLayerField({'name': 'start'}),
                 InfoLayerField([[Point(0, 0, srid=4326), "Of interest"]]),
             ])
+
             class Meta:
                 model = MyModel
 
         instance = MyModel.objects.create(start="SRID=4326;POINT(0 0)",
-                route="SRID=4326;LINESTRING(0 0,1 1)")
+                                          route="SRID=4326;LINESTRING(0 0,1 1)")
         form = MyInfoModelForm({
-                'start': "SRID=4326;POINT(0 0)",
-                'route': "SRID=4326;LINESTRING(0 0,1 1)",
-                'death': False,
-            }, instance=instance)
+            'start': "SRID=4326;POINT(0 0)",
+            'route': "SRID=4326;LINESTRING(0 0,1 1)",
+            'death': False,
+        }, instance=instance)
         self.assertEqual(form.fields.keys(),
-            ['koan', 'start', 'love', 'route', 'death', 'end'])
+                         ['koan', 'start', 'love', 'route', 'death', 'end'])
         self.assertEquals(form.errors, {})
         form.save()
 
@@ -199,13 +216,13 @@ class TestForm(TestCase):
 
     def test_has_changed(self):
         vals = {
-                'start': "SRID=4326;POINT(0 0)",
-                'route': "SRID=4326;LINESTRING(0 0,1 1)",
+            'start': "SRID=4326;POINT(0 0)",
+            'route': "SRID=4326;LINESTRING(0 0,1 1)",
         }
         instance = MyModel.objects.create(**vals)
         form = MyModelForm(vals, instance=instance)
         self.assertFalse(form.has_changed())
-        
+
         form = MyModelForm({
             'start': "SRID=4326;POINT(0 0.1)",
             'route': "SRID=4326;LINESTRING(0 0,1 1)",
@@ -225,7 +242,7 @@ class TestForm(TestCase):
             'required': None,
             'unspecified': None,
         })
-        #print form.fields['optional'].required
+        # print form.fields['optional'].required
         self.assertFalse(form.is_valid())
 
         form = RequirednessForm({
@@ -245,4 +262,3 @@ class TestForm(TestCase):
         for field in ('start', 'end'):
             self.assertEquals(unicode(form[field]), u'<h1>Boogah!</h1>\n')
         self.assertNotEquals(unicode(form['route']), u'<h1>Boogah!</h1>\n')
-

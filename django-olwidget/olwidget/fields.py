@@ -1,8 +1,7 @@
 from django import forms
-
+from django.contrib.gis.forms.fields import GeometryField
 from olwidget.widgets import Map, EditableLayer, InfoLayer
 
-from django.contrib.gis.forms.fields import GeometryField
 
 class MapField(forms.fields.Field):
     """
@@ -14,22 +13,21 @@ class MapField(forms.fields.Field):
         MapField([EditableLayerField(), InfoLayerField()], options={...})
 
     """
-    def __init__(self, fields=None, options=None, layer_names=None, 
-            template=None, **kwargs):
+    def __init__(self, fields=None, options=None, layer_names=None, template=None, **kwargs):
         # create map widget enclosing vector layers and options
         if not fields:
             fields = [EditableLayerField()]
         layers = [field.widget for field in fields]
         self.fields = fields
-        kwargs['widget'] = kwargs.get('widget', 
-                Map(layers, options, template, layer_names))
+        kwargs['widget'] = kwargs.get('widget', Map(layers, options, template, layer_names))
         super(MapField, self).__init__(**kwargs)
 
     def clean(self, value):
         """
         Return an array with the value from each layer.
         """
-        return [f.clean(v) for v,f in zip(value, self.fields)]
+        return [f.clean(v) for v, f in zip(value, self.fields)]
+
 
 class EditableLayerField(GeometryField):
     """
@@ -41,11 +39,12 @@ class EditableLayerField(GeometryField):
         kwargs['widget'] = kwargs.get('widget', EditableLayer(options))
         super(EditableLayerField, self).__init__(**kwargs)
 
+
 class InfoLayerField(forms.fields.CharField):
     """
     Equivalent to:
 
-    forms.CharField(widget=InfoLayer(info=[...], options={...}), 
+    forms.CharField(widget=InfoLayer(info=[...], options={...}),
             required=False)
     """
     def __init__(self, info, options=None, **kwargs):

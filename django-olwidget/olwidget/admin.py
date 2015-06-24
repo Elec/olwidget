@@ -37,6 +37,7 @@ from olwidget.utils import DEFAULT_PROJ
 
 __all__ = ('GeoModelAdmin',)
 
+
 class GeoModelAdmin(ModelAdmin):
     options = None
     map_template = "olwidget/admin_olwidget.html"
@@ -57,12 +58,14 @@ class GeoModelAdmin(ModelAdmin):
 
         # enclose klass.__init__
         orig_init = ModelForm.__init__
+
         def new_init(self, *args, **kwargs):
             orig_init(self, *args, **kwargs)
             fix_initial_data(self.initial, self.initial_data_keymap)
 
         # enclose klass.clean
         orig_clean = ModelForm.clean
+
         def new_clean(self):
             orig_clean(self)
             fix_cleaned_data(self.cleaned_data, self.initial_data_keymap)
@@ -74,9 +77,9 @@ class GeoModelAdmin(ModelAdmin):
 
         # Rearrange fields
         ModelForm.initial_data_keymap = apply_maps_to_modelform_fields(
-                ModelForm.base_fields, self.maps, self.options,
-                self.map_template,
-                default_field_class=self.default_field_class)
+            ModelForm.base_fields, self.maps, self.options,
+            self.map_template,
+            default_field_class=self.default_field_class)
         return ModelForm
 
     def get_changelist_map(self, cl, request=None):
@@ -116,11 +119,11 @@ class GeoModelAdmin(ModelAdmin):
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
         template_response = super(GeoModelAdmin, self).changelist_view(
-                request, extra_context)
+            request, extra_context)
         if hasattr(template_response, 'context_data') and \
                 'cl' in template_response.context_data:
             map_ = self.get_changelist_map(
-                    template_response.context_data['cl'], request)
+                template_response.context_data['cl'], request)
             if map_:
                 template_response.context_data['media'] += map_.media
                 template_response.context_data['map'] = map_
