@@ -30,7 +30,7 @@ api_defaults = {
     'OLWIDGET_CSS': utils.url_join(settings.OLWIDGET_STATIC_URL, "css/olwidget.css"),
 }
 
-for key, default in api_defaults.iteritems():
+for key, default in list(api_defaults.items()):
     if not hasattr(settings, key):
         setattr(settings, key, default)
 
@@ -126,9 +126,9 @@ class Map(forms.Widget):
         return layer_types_js
 
     def _get_layer_names(self, name):
-        """ 
+        """
         If the user gave us a layer_names parameter, use that.  Otherwise,
-        construct names based on ``name``. 
+        construct names based on ``name``.
         """
         n = len(self.vector_layers)
         if self.layer_names and len(self.layer_names) == n:
@@ -145,7 +145,7 @@ class Map(forms.Widget):
 
     def _has_changed(self, initial, data):
         if (initial is None) or (not isinstance(initial, (tuple, list))):
-            initial = [u''] * len(data)
+            initial = [''] * len(data)
         for widget, initial, data in zip(self.vector_layers, initial, data):
             if utils.get_geos(initial) != utils.get_geos(data):
                 return True
@@ -263,7 +263,7 @@ class InfoLayer(BaseVectorLayer):
                 wkt_array.append([wkt, attr])
         info_json = json.dumps(wkt_array)
 
-        if name and not self.options.has_key('name'):
+        if name and 'name' not in self.options:
             self.options['name'] = forms.forms.pretty_name(name)
 
         context = {
@@ -292,7 +292,7 @@ class EditableLayer(BaseVectorLayer):
     def prepare(self, name, value, attrs=None):
         if not attrs:
             attrs = {}
-        if name and not self.options.has_key('name'):
+        if name and 'name' not in self.options:
             self.options['name'] = forms.forms.pretty_name(name)
         attrs['id'] = attrs.get('id', "id_%s" % id(self))
 
@@ -330,7 +330,7 @@ class EditableMap(BaseSingleLayerMap):
     """
     def __init__(self, options=None, **kwargs):
         super(EditableMap, self).__init__([EditableLayer()], options, **kwargs)
-        
+
 class InfoMap(BaseSingleLayerMap):
     """
     Convenience Map widget with a single info layer.
