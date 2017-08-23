@@ -253,9 +253,8 @@ class GeoModelAdmin(ModelAdmin):
             context['map'] = map_
         # END MODIFICATION
 
-        context_instance = template.RequestContext(request, current_app=self.admin_site.name)
         return render_to_response(self.change_list_template or [
             'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
             'admin/%s/change_list.html' % app_label,
             'admin/change_list.html'
-        ], context, context_instance=context_instance)
+        ], context)

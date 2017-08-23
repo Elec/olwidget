@@ -1,5 +1,4 @@
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.conf import settings
@@ -30,14 +29,14 @@ def edit_alienactivity(request, object_id):
             raise
     return render_to_response("testolwidget/edit_obj.html", {
         'obj': obj, 'form': form,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def show_alienactivity(request, object_id):
     obj = get_object_or_404(AlienActivity, id=object_id)
     return render_to_response("testolwidget/show_obj.html", {
         'obj': obj, 'map': Map([
-                InfoLayer([[obj.landings, 
+                InfoLayer([[obj.landings,
                     "%s landings" % obj.incident_name]], {
                         'overlay_style': {
                             'external_graphic': settings.MEDIA_URL+"alien.png",
@@ -47,7 +46,7 @@ def show_alienactivity(request, object_id):
                             'stroke_color': '#008800',
                         }, 'name': "Landings"
                     }),
-                InfoLayer([[obj.strange_lights, 
+                InfoLayer([[obj.strange_lights,
                     "%s strange lights" % obj.incident_name]], {
                         'overlay_style': {
                             'fill_color': '#FFFF00',
@@ -55,7 +54,7 @@ def show_alienactivity(request, object_id):
                             'stroke_width': 6,
                         }, 'name': "Strange lights",
                     }),
-                InfoLayer([[obj.chemtrails, 
+                InfoLayer([[obj.chemtrails,
                     "%s chemtrails" % obj.incident_name]], {
                         'overlay_style': {
                             'fill_color': '#ffffff',
@@ -65,7 +64,7 @@ def show_alienactivity(request, object_id):
                     })
             ], {'layers': ['osm.mapnik', 'google.physical']}),
         'edit_link': reverse("edit_alienactivity", args=[obj.id])
-    }, context_instance=RequestContext(request))
+    })
 
 def edit_tree(request, object_id):
     return do_edit_tree(request, object_id, DefaultTreeForm)
@@ -81,7 +80,7 @@ def do_edit_tree(request, object_id, Form):
         return HttpResponseRedirect(reverse("show_tree", args=[obj.id]))
     return render_to_response("testolwidget/edit_obj.html", {
             'obj': obj, 'form': form,
-        }, context_instance=RequestContext(request))
+        })
 
 def show_tree(request, object_id):
     obj = get_object_or_404(Tree, id=object_id)
@@ -91,15 +90,15 @@ def show_tree(request, object_id):
             [obj.location, "Trunk center"],
         ])
     return render_to_response("testolwidget/show_obj.html", {
-            'obj': obj, 'map': map_, 
+            'obj': obj, 'map': map_,
             'edit_link': reverse("edit_tree", args=[obj.id]),
-        }, context_instance=RequestContext(request))
+        })
 
 def edit_capitals(request):
     return render_to_response("testolwidget/edit_obj.html", {
         'obj': "Capitals",
         'form': MixedForm(),
-    }, context_instance=RequestContext(request))
+    })
 
 
 def show_countries(request):
@@ -115,13 +114,13 @@ def show_countries(request):
         }))
     map_ = InfoMap(info)
     return render_to_response("testolwidget/show_obj.html", {
-        'obj': "Countries", "map": map_, 
+        'obj': "Countries", "map": map_,
         "edit_link": "/admin/testolwidget/country/",
-    }, context_instance=RequestContext(request))
+    })
 
 def index(request):
     return render_to_response("testolwidget/index.html", {
-            'map': Map([ 
+            'map': Map([
                 EditableLayer({
                     'geometry': ['point', 'linestring', 'polygon'],
                     'is_collection': True,
@@ -131,5 +130,5 @@ def index(request):
                 'default_lon': -71.087611985694,
                 'default_zoom': 10,
                 'layers': ['osm.mapnik', 'google.physical'],
-            }), 
-        }, context_instance=RequestContext(request))
+            }),
+        })
