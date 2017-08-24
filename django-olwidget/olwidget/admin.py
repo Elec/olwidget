@@ -96,7 +96,7 @@ class GeoModelAdmin(ModelAdmin):
         """
         if self.list_map:
             info = []
-            for obj in cl.get_query_set():
+            for obj in cl.get_queryset(request):
                 # Transform the fields into one projection.
                 geoms = []
                 for field in self.list_map:
@@ -168,7 +168,7 @@ class GeoModelAdmin(ModelAdmin):
         if actions and request.method == 'POST' and (
                 helpers.ACTION_CHECKBOX_NAME in request.POST
                 or 'index' in request.POST):
-            response = self.response_action(request, queryset=cl.get_query_set())
+            response = self.response_action(request, queryset=cl.get_queryset(request))
             if response:
                 return response
 
